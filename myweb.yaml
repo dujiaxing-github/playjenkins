@@ -16,7 +16,7 @@ spec:
         app: myweb
     spec:
       containers:
-      - image: djx001:5000/myweb:1
+      - image: djx001:5000/myweb:v1
         imagePullPolicy: Always
         name: myweb
 
