@@ -1,46 +1,22 @@
 pipeline {
 
-  environment {
-    registry = "192.168.1.81:5000/justme/myweb"
-    dockerImage = ""
-  }
-
-  agent any
-
-  stages {
-
-    stage('Checkout Source') {
-      steps {
-        git 'https://github.com/justmeandopensource/playjenkins.git'
-      }
+    stage("Git Clone"){
+        git 'https://github.com/dujiaxing-github/playjenkins.git'
+    }
+    
+    stage("Build Docker Image"){
+        sh "docker build -t 192.167.138.54:5000/myweb:v1 ."
+    }
+    stage("Docker Push"){
+        sh "docker push 192.167.138.54:5000/myweb:v1"
     }
 
-    stage('Build image') {
-      steps{
-        script {
-          dockerImage = docker.build registry + ":$BUILD_NUMBER"
-        }
-      }
+    stage("Deploy Application in K8S"){
+        kubernetesDeploy(
+            configs: 'myweb.yaml',
+            kubeconfigId: 'kube_config_id',
+            enableConfigSubstitution: true
+        )
     }
-
-    stage('Push Image') {
-      steps{
-        script {
-          docker.withRegistry( "" ) {
-            dockerImage.push()
-          }
-        }
-      }
-    }
-
-    stage('Deploy App') {
-      steps {
-        script {
-          kubernetesDeploy(configs: "myweb.yaml", kubeconfigId: "mykubeconfig")
-        }
-      }
-    }
-
-  }
 
 }
